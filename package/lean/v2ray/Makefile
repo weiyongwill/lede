@@ -7,8 +7,25 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=v2ray
-PKG_VERSION:=4.5.0
-PKG_RELEASE:=2
+PKG_VERSION:=4.20
+PKG_RELEASE:=1
+
+include $(INCLUDE_DIR)/package.mk
+
+define Package/$(PKG_NAME)
+	SECTION:=net
+	CATEGORY:=Network
+	TITLE:=V2Ray is a cross-platform proxy software
+	DEPENDS:=+ca-certificates 
+	URL:=https://github.com/v2ray/v2ray-core
+endef
+
+
+define Package/$(PKG_NAME)/description
+V2Ray is a cross-platform proxy software
+endef
+
+V2RAY_BIN:=v2ray
 
 ifeq ($(ARCH),x86_64)
 	PKG_ARCH_V2RAY:=amd64
@@ -20,28 +37,20 @@ ifeq ($(ARCH),mips)
 	PKG_ARCH_V2RAY:=mips
 endif
 ifeq ($(ARCH),i386)
-	PKG_ARCH_V2RAY:=386
+	PKG_ARCH_V2RAY:=x86
 endif
 ifeq ($(ARCH),arm)
 	PKG_ARCH_V2RAY:=arm
+	ifneq ($(BOARD),bcm53xx)
+		V2RAY_BIN:=v2ray_armv7
+  endif
+  ifeq ($(BOARD),kirkwood)
+		V2RAY_BIN:=v2ray
+  endif
 endif
 ifeq ($(ARCH),aarch64)
 	PKG_ARCH_V2RAY:=arm64
 endif
-
-include $(INCLUDE_DIR)/package.mk
-
-define Package/$(PKG_NAME)
-	SECTION:=net
-	CATEGORY:=Network
-	TITLE:=V2Ray is a cross-platform proxy software
-	DEPENDS:=+ca-certificates
-	URL:=https://github.com/v2ray/v2ray-core
-endef
-
-define Package/$(PKG_NAME)/description
-V2Ray is a cross-platform proxy software
-endef
 
 define Build/Prepare
 endef
@@ -54,7 +63,7 @@ endef
 
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/bin/v2ray
-	$(INSTALL_BIN) ./files/$(ARCH)/v2ray $(1)/usr/bin/v2ray/
+	$(INSTALL_BIN) ./files/$(PKG_ARCH_V2RAY)/$(V2RAY_BIN) $(1)/usr/bin/v2ray/v2ray
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
